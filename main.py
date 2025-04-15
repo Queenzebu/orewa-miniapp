@@ -3,11 +3,11 @@ import telegram
 import os
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")  # Make sure this is set correctly
 bot = telegram.Bot(token=TOKEN)
 app = Flask(__name__)
 
-# Detailed welcome message
+# Welcome message
 welcome_text = (
     "👋 *Welcome to Orewapp!* 🚀🌍\n\n"
     "Orewapp is your all-in-one Web3 dashboard — built for mining, staking, NFTs, governance, and community-powered rewards — all inside Telegram!\n\n"
@@ -24,46 +24,49 @@ welcome_text = (
 )
 
 @app.route("/")
-def home():
-    return "Welcome to OREWA App!"
+def index():
+    return "OREWA bot is running!"
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    update = request.json
-    chat_id = update['message']['chat']['id']
-    message = update['message']['text']
+    update = request.get_json()
 
-    # Respond to /start command
-    if message == "/start":
-        # Send welcome message with options
-        bot.send_message(
-            chat_id=chat_id,
-            text=welcome_text,
-            parse_mode="Markdown",
-            reply_markup=InlineKeyboardMarkup([
-                [
-                    InlineKeyboardButton("Launch App", callback_data="launch_app"),
-                    InlineKeyboardButton("Join Community", url="https://t.me/OrevaAppOfficial")
-                ]
-            ])
-        )
-
-    # Handle callback query for "Launch App" button
+    # Handle callback query (button click)
     if "callback_query" in update:
-        callback_data = update['callback_query']['data']
-        user_id = update['callback_query']['from']['id']  # Get the user's id
-        if callback_data == "launch_app":
-            # Check if callback_data is received correctly
-            bot.send_message(chat_id=user_id, text="Launching your app... 🚀")
-            # Optional: Add more functionality for the "Launch App" action
+        callback_query = update["callback_query"]
+        user_id = callback_query["from"]["id"]
+        data = callback_query["data"]
+
+        if data == "launch_app":
+            bot.send_message(chat_id=user_id, text="🚀 Loading your dashboard...", parse_mode="Markdown")
+        return jsonify(status="callback received")
+
+    # Handle normal message (/start)
+    if "message" in update:
+        message = update["message"]
+        chat_id = message["chat"]["id"]
+        text = message.get("text", "")
+
+        if text == "/start":
+            bot.send_message(
+                chat_id=chat_id,
+                text=welcome_text,
+                parse_mode="Markdown",
+                reply_markup=InlineKeyboardMarkup([
+                    [
+                        InlineKeyboardButton("Launch App", callback_data="launch_app"),
+                        InlineKeyboardButton("Join Community", url="https://t.me/OrevaAppOfficial")
+                    ]
+                ])
+            )
 
     return jsonify(status="ok")
 
 @app.route("/set_webhook", methods=["GET"])
 def set_webhook():
-    webhook_url = "https://your-app-url/webhook"  # Replace with your actual URL
-    bot.set_webhook(url=webhook_url)
-    return "Webhook has been set!"
+    webhook_url = "https://your-deployed-url/webhook"  # Change to your actual deployed URL
+    success = bot.set_webhook(url=webhook_url)
+    return "Webhook set!" if success else "Failed to set webhook"
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000)
+    app.run(debug=True)
