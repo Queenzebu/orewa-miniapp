@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OREWA Mini App</title>
+    <script src="https://unpkg.com/@tonconnect/sdk@latest"></script>
+</head>
+<body>
+    <h1>👋 Welcome to OREWA</h1>
+    <p id="telegram"></p>
+
+    <button id="connect-btn">🔗 Connect TON Wallet</button>
+    <p id="wallet-address"></p>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        document.getElementById("telegram").innerText = "Hello, " + tg.initDataUnsafe.user.first_name;
+
+        const tonConnect = new TON_CONNECT.TonConnect();
+        tonConnect.connectWallet().then(wallet => {
+            const address = wallet.account.address;
+            document.getElementById("wallet-address").innerText = "Wallet: " + address;
+            console.log("Wallet connected:", address);
+        });
+    </script>
+</body>
+</html>
