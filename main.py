@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify, render_template
 import telegram
 import os
 
-TOKEN = "7665811116:AAFRo7RGa-d6ESXXeqksCGGS0CDEUDGr2f8"
+# Fetch Telegram Bot Token from environment variable
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 BOT_USERNAME = "orewapp_bot"
 
 bot = telegram.Bot(token=TOKEN)
@@ -20,4 +21,3 @@ def webapp_data():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000)
-
