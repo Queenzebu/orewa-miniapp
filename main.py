@@ -48,11 +48,14 @@ def webhook():
             ])
         )
 
-    # Handle button press for Launch App
+    # Handle callback query for "Launch App" button
     if "callback_query" in update:
         callback_data = update['callback_query']['data']
+        user_id = update['callback_query']['from']['id']  # Get the user's id
         if callback_data == "launch_app":
-            bot.send_message(chat_id=chat_id, text="Launching your app... 🚀")
+            # Check if callback_data is received correctly
+            bot.send_message(chat_id=user_id, text="Launching your app... 🚀")
+            # Optional: Add more functionality for the "Launch App" action
 
     return jsonify(status="ok")
 
