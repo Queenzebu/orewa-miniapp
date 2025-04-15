@@ -18,10 +18,11 @@ def webhook():
     try:
         update = telegram.Update.de_json(request.get_json(force=True), bot)
 
+        # Determine chat_id depending on message or callback
         chat_id = update.message.chat.id if update.message else update.callback_query.message.chat.id
 
         if update.message:
-            text = update.message.text
+            text = update.message.text.strip().lower()
 
             if text == "/start":
                 # Create buttons
@@ -49,10 +50,11 @@ def webhook():
                 bot.send_message(chat_id=chat_id, text="❓ Unknown action.")
 
         return jsonify(status="ok")
+
     except Exception as e:
         return jsonify(error=str(e))
 
-# Manually set the webhook
+# Endpoint to manually set the webhook
 @app.route("/set_webhook", methods=["GET"])
 def set_webhook():
     try:
